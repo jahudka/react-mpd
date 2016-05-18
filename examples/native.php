@@ -22,7 +22,7 @@ $client = new Jahudka\MPD\Client($connection, $config['options']);
 $client
     ->clear()
     ->then(function() use ($client) {
-        return $client->add('I am OK/Unknown Album/OK.mp3');
+        return $client->add('Path/To/Song.mp3');
     })
     ->then($client->command('toggleRepeat', false))
     ->then($client->command('toggleRandom', false))
