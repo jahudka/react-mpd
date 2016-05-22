@@ -585,7 +585,7 @@ class Client extends EventEmitter {
         array_unshift($commands, 'command_list_begin');
         array_push($commands, 'command_list_end');
 
-        return $this->connection->send(implode("\n", $commands) . "\n")->then([$this, 'expectResponse']);
+        return $this->send(implode("\n", $commands));
 
     }
 
@@ -664,12 +664,22 @@ class Client extends EventEmitter {
      */
     protected function sendCommand($command, $args = null) {
         $msg = call_user_func_array([$this, 'formatCommand'], func_get_args());
+        return $this->send($msg);
 
+    }
+
+    /**
+     * @param string $msg
+     * @return PromiseInterface
+     */
+    protected function send($msg) {
         if (isset($this->idle['promise'])) {
-            $promise = $this->idle(false)->then(function() use ($msg) {
-                return $this->connection->send($msg . "\n");
+            $promise = $this->idle(false)
+                ->then(function() use ($msg) {
+                    return $this->connection->send($msg . "\n");
 
-            })->then([$this, 'expectResponse']);
+                })
+                ->then([$this, 'expectResponse']);
 
             $promise->then(function() {
                 return $this->idle(true);
