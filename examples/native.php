@@ -15,7 +15,7 @@ $config = [
 ];
 
 
-$connection = new Jahudka\MPD\Bridges\Native\Connection($config['connection']);
+$connection = new Jahudka\MPD\Connection\Native($config['connection']);
 $client = new Jahudka\MPD\Client($connection, $config['options']);
 
 

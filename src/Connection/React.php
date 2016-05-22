@@ -6,10 +6,11 @@
  * Time: 16:17
  */
 
-namespace Jahudka\MPD\Bridges\React;
+namespace Jahudka\MPD\Connection;
 
 
 use Jahudka\MPD\ConnectionInterface;
+use Jahudka\MPD\Exception;
 use React\EventLoop\LoopInterface;
 use React\Promise\Promise;
 use React\Promise\PromiseInterface;
@@ -17,7 +18,7 @@ use React\SocketClient\TcpConnector;
 use React\SocketClient\UnixConnector;
 use React\Stream\Stream;
 
-class Connection implements ConnectionInterface {
+class React implements ConnectionInterface {
 
     /** @var array */
     public static $defaults = [
@@ -36,7 +37,7 @@ class Connection implements ConnectionInterface {
     private $connection = null;
 
     /** @var Stream */
-    private $io = null;
+    private $stream = null;
 
     /** @var callable[] */
     private $dataHandlers = [];
@@ -60,8 +61,7 @@ class Connection implements ConnectionInterface {
      */
     public function send($data) {
         return $this->getConnection()->then(function() use ($data) {
-            $this->io->write($data);
-
+            $this->stream->write($data);
         });
     }
 
@@ -103,12 +103,13 @@ class Connection implements ConnectionInterface {
      * @return PromiseInterface
      */
     public function handleInit(Stream $stream) {
-        $this->io = $stream;
+        $this->stream = $stream;
 
         return new Promise(function(callable $fulfill, callable $reject) {
-            $this->io->once('data', function($data) use ($fulfill, $reject) {
+            $this->stream->once('data', function($data) use ($fulfill, $reject) {
                 if (preg_match('/^ok\b/i', $data)) {
-                    $this->io->on('data', [$this, 'handleData']);
+                    $this->stream->on('data', [$this, 'handleData']);
+                    $this->stream->on('error', [$this, 'handleError']);
                     call_user_func($fulfill);
 
                 } else {
@@ -127,5 +128,20 @@ class Connection implements ConnectionInterface {
             call_user_func($handler, $data);
 
         }
+    }
+
+
+    /**
+     * @param $err
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function handleError($err) {
+        if ($err instanceof \Exception || $err instanceof \Throwable) {
+            throw $err;
+        }
+
+        throw new Exception((string) $err);
+
     }
 }

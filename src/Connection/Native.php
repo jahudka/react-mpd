@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Jahudka\MPD\Bridges\Native;
+namespace Jahudka\MPD\Connection;
 
 
 use Jahudka\MPD\ConnectionInterface;
@@ -9,7 +9,7 @@ use Jahudka\MPD\Exception;
 use React\Promise\PromiseInterface;
 use React\Promise;
 
-class Connection implements ConnectionInterface {
+class Native implements ConnectionInterface {
 
     /** @var array */
     public static $defaults = [

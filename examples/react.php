@@ -16,7 +16,7 @@ $config = [
 
 
 $loop = React\EventLoop\Factory::create();
-$connection = new Jahudka\MPD\Bridges\React\Connection($loop, $config['connection']);
+$connection = new Jahudka\MPD\Connection\React($loop, $config['connection']);
 $client = new Jahudka\MPD\Client($connection, $config['options']);
 
 
